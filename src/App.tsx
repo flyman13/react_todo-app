@@ -1,9 +1,10 @@
 /* eslint-disable jsx-a11y/control-has-associated-label */
 import React, { useContext, useState, useEffect } from 'react';
 import { TodoContext } from './TodoContext';
-import { TodoItem } from './TodoItem';
-
-type FilterType = 'all' | 'active' | 'completed';
+import { Filter } from './types/Filter';
+import { Header } from './components/Header/Header';
+import { TodoList } from './components/TodoList/TodoList';
+import { Footer } from './components/Footer/Footer';
 
 export const App: React.FC = () => {
   const context = useContext(TodoContext);
@@ -13,54 +14,36 @@ export const App: React.FC = () => {
   }
 
   const { todos, addTodo, toggleAll, clearCompleted } = context;
-
-  const [newTodoTitle, setNewTodoTitle] = useState('');
-  const [filter, setFilter] = useState<FilterType>('all');
+  const [filter, setFilter] = useState<Filter>(Filter.All);
 
   useEffect(() => {
     const handleHashChange = () => {
       const hash = window.location.hash;
 
       if (hash === '#/active') {
-        setFilter('active');
+        setFilter(Filter.Active);
       } else if (hash === '#/completed') {
-        setFilter('completed');
+        setFilter(Filter.Completed);
       } else {
-        setFilter('all');
+        setFilter(Filter.All);
       }
     };
 
     window.addEventListener('hashchange', handleHashChange);
-    handleHashChange(); // Initialize on mount
+    handleHashChange();
 
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
-
-  const newTodoInputRef = React.useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    newTodoInputRef.current?.focus();
-  }, [todos]);
-
-  const handleAddSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (newTodoTitle.trim()) {
-      addTodo(newTodoTitle);
-      setNewTodoTitle('');
-    }
-
-    newTodoInputRef.current?.focus();
-  };
 
   const activeTodos = todos.filter(todo => !todo.completed);
   const completedTodos = todos.filter(todo => todo.completed);
 
   const visibleTodos = todos.filter(todo => {
-    if (filter === 'active') {
+    if (filter === Filter.Active) {
       return !todo.completed;
     }
 
-    if (filter === 'completed') {
+    if (filter === Filter.Completed) {
       return todo.completed;
     }
 
@@ -74,83 +57,23 @@ export const App: React.FC = () => {
       <h1 className="todoapp__title">todos</h1>
 
       <div className="todoapp__content">
-        <header className="todoapp__header">
-          {todos.length > 0 && (
-            <button
-              type="button"
-              className={`todoapp__toggle-all ${allCompleted ? 'active' : ''}`}
-              data-cy="ToggleAllButton"
-              onClick={toggleAll}
-            />
-          )}
-
-          <form onSubmit={handleAddSubmit}>
-            <input
-              ref={newTodoInputRef}
-              data-cy="NewTodoField"
-              type="text"
-              className="todoapp__new-todo"
-              placeholder="What needs to be done?"
-              value={newTodoTitle}
-              onChange={e => setNewTodoTitle(e.target.value)}
-              autoFocus
-            />
-          </form>
-        </header>
+        <Header
+          todosCount={todos.length}
+          allCompleted={allCompleted}
+          onToggleAll={toggleAll}
+          onAddTodo={addTodo}
+        />
 
         {todos.length > 0 && (
           <>
-            <section className="todoapp__main" data-cy="TodoList">
-              {visibleTodos.map(todo => (
-                <TodoItem key={todo.id} todo={todo} />
-              ))}
-            </section>
+            <TodoList todos={visibleTodos} />
 
-            <footer className="todoapp__footer" data-cy="Footer">
-              <span className="todo-count" data-cy="TodosCounter">
-                {`${activeTodos.length} item${activeTodos.length === 1 ? '' : 's'} left`}
-              </span>
-
-              <nav className="filter" data-cy="Filter">
-                <a
-                  href="#/"
-                  className={`filter__link ${
-                    filter === 'all' ? 'selected' : ''
-                  }`}
-                  data-cy="FilterLinkAll"
-                >
-                  All
-                </a>
-                <a
-                  href="#/active"
-                  className={`filter__link ${
-                    filter === 'active' ? 'selected' : ''
-                  }`}
-                  data-cy="FilterLinkActive"
-                >
-                  Active
-                </a>
-                <a
-                  href="#/completed"
-                  className={`filter__link ${
-                    filter === 'completed' ? 'selected' : ''
-                  }`}
-                  data-cy="FilterLinkCompleted"
-                >
-                  Completed
-                </a>
-              </nav>
-
-              <button
-                type="button"
-                className="todoapp__clear-completed"
-                data-cy="ClearCompletedButton"
-                onClick={clearCompleted}
-                disabled={completedTodos.length === 0}
-              >
-                Clear completed
-              </button>
-            </footer>
+            <Footer
+              activeCount={activeTodos.length}
+              completedCount={completedTodos.length}
+              currentFilter={filter}
+              onClearCompleted={clearCompleted}
+            />
           </>
         )}
       </div>

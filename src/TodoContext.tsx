@@ -1,10 +1,7 @@
 import React, { createContext, useState, useEffect, ReactNode } from 'react';
+import { Todo } from './types/Todo';
 
-export interface Todo {
-  id: number;
-  title: string;
-  completed: boolean;
-}
+export type { Todo };
 
 interface TodoContextType {
   todos: Todo[];

@@ -1,6 +1,7 @@
 /* eslint-disable jsx-a11y/label-has-associated-control */
 import React, { useState, useRef, useEffect, useContext } from 'react';
-import { Todo, TodoContext } from './TodoContext';
+import { Todo } from '../../types/Todo';
+import { TodoContext } from '../../TodoContext';
 
 interface TodoItemProps {
   todo: Todo;
@@ -18,14 +19,13 @@ export const TodoItem: React.FC<TodoItemProps> = ({ todo }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState(todo.title);
   const inputRef = useRef<HTMLInputElement>(null);
+  const isEscaped = useRef(false);
 
   useEffect(() => {
     if (isEditing && inputRef.current) {
       inputRef.current.focus();
     }
   }, [isEditing]);
-
-  const isEscaped = useRef(false);
 
   const handleDoubleClick = () => {
     isEscaped.current = false;
@@ -54,7 +54,7 @@ export const TodoItem: React.FC<TodoItemProps> = ({ todo }) => {
     if (e.key === 'Escape') {
       isEscaped.current = true;
       setIsEditing(false);
-      setEditTitle(todo.title); // Reset to original title
+      setEditTitle(todo.title);
     }
   };
 
