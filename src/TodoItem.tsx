@@ -33,6 +33,7 @@ export const TodoItem: React.FC<TodoItemProps> = ({ todo }) => {
     setEditTitle(todo.title);
   };
 
+
   const saveEdit = () => {
     updateTodoTitle(todo.id, editTitle);
     setIsEditing(false);
